@@ -9,9 +9,10 @@
     <br />
     <input id="run" type="checkbox"></input> Run
     <input id="fps" type="number" min="1" value="10"></input> FPS
+    <input id="lines" type="checkbox" onclick="draw()"></input> Lines
     <br />
     <button onclick="step()">Step</button>
-    <button onclick="grid = makegrid(); draw()">Clear</button>
+    <button onclick="grid = makegrid(); stop(); draw()">Clear</button>
     <button onclick="fillrandom(); draw()">Random</button>
     <br />
     <button onclick="savedata()">Croppy</button>
@@ -20,29 +21,9 @@
     <button onclick="grid = makegrid(); loaddata()">LOAD</button>
     <button onclick="grid = makegrid(); loaddata(1)">lOAD</button>
     <button onclick="savedata(true)">COPY</button>
+    <input id="format" type="checkbox"></input> Format
     <br />
-    <textarea id="text">[
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
-        ]
-    </textarea>
+    <textarea id="text">[[1,1,1],[0,0,1],[0,1,0]]</textarea>
     <script type="text/javascript">
         function mod(f, s) {
             return ((f % s) + s) % s;
@@ -121,7 +102,12 @@
         }
 
         function savedata(all=false) {
-            text.value = '[\n' + ((all ? grid: getrelevant()).map(JSON.stringify)).join(',\n') + '\n]';
+            var data = all ? grid: getrelevant();
+            if (format.checked) {
+                text.value = '[\n' + (data.map(JSON.stringify)).join(',\n') + '\n]';
+            } else {
+                text.value = JSON.stringify(data);
+            }
         }
 
         function loaddata(corner=false) {
@@ -160,7 +146,9 @@
         }
 
         function onfps(v) {
-            start();
+            if (run.checked) {
+                start();
+            }
         }
 
         function ontoggle(v) {
@@ -181,9 +169,23 @@
         }
 
         function draw() {
-            cx.fillStyle = '#000000'
+            cx.fillStyle = '#000000';
             cx.fillRect(0, 0, 800, 800);
-            cx.fillStyle = '#FFFFFF'
+            if (lines.checked) {
+                cx.strokeStyle = '#666666';
+                for (var i = 0; i < height + 1; i++) {
+                    cx.beginPath();
+                    cx.moveTo(i * 8, 0);
+                    cx.lineTo(i * 8, 800);
+                    cx.stroke();
+
+                    cx.beginPath();
+                    cx.moveTo(0, i * 8);
+                    cx.lineTo(800, i * 8);
+                    cx.stroke();
+                }
+            }
+            cx.fillStyle = '#FFFFFF';
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     if (grid[y][x]) {
@@ -220,15 +222,17 @@
             text = document.getElementById('text'),
             check = document.getElementById('run'),
             fps = document.getElementById('fps'),
+            lines = document.getElementById('lines'),
+            format = document.getElementById('format'),
             canvas = document.getElementById('canvas'),
             cx = canvas.getContext('2d');
             
-        loaddata();
-        savedata();
-        draw();
         canvas.onclick = onclick;
         run.onclick = ontoggle;
         fps.onclick = onfps;
+        
+        loaddata();
+        draw();
     </script>
 </body>
 </html>
