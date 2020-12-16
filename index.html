@@ -172,16 +172,18 @@
             cx.fillStyle = '#000000';
             cx.fillRect(0, 0, 800, 800);
             if (lines.checked) {
-                cx.strokeStyle = '#666666';
+                cx.strokeStyle = '#444444';
                 for (var i = 0; i < height + 1; i++) {
                     cx.beginPath();
                     cx.moveTo(i * 8, 0);
                     cx.lineTo(i * 8, 800);
+                    cx.closePath();
                     cx.stroke();
 
                     cx.beginPath();
                     cx.moveTo(0, i * 8);
                     cx.lineTo(800, i * 8);
+                    cx.closePath();
                     cx.stroke();
                 }
             }
