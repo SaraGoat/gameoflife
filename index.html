@@ -7,25 +7,45 @@
 <body>
     <canvas id="canvas" width="800", height="800"></canvas><br />
     <br />
+    <input id="run" type="checkbox"></input> Run
+    <input id="fps" type="number" min="1" value="10"></input> FPS
+    <br />
     <button onclick="step()">Step</button>
     <button onclick="grid = makegrid(); draw()">Clear</button>
-    <button onclick="fillrandom(); draw()">Random</button><br />
+    <button onclick="fillrandom(); draw()">Random</button>
+    <br />
     <button onclick="savedata()">Croppy</button>
     <button onclick="loaddata()">Load</button>
     <button onclick="loaddata(true)">load</button>
     <button onclick="grid = makegrid(); loaddata()">LOAD</button>
     <button onclick="grid = makegrid(); loaddata(1)">lOAD</button>
-    <button onclick="savedata(true)">COPY</button> <br />
-    <textarea id="text" style="visibility: hidden"></textarea>
+    <button onclick="savedata(true)">COPY</button>
+    <br />
+    <textarea id="text">
+        [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0],
+        [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+    </textarea>
     <script type="text/javascript">
         function mod(f, s) {
-            if (f < 0 && s > 0) {
-                while (f < 0) {
-                    f = f + s;
-                }
-                return f;
-            }
-            return f % s;
+            return ((f % s) + s) % s;
         }
         
         function getneigh(x, y) {
@@ -101,12 +121,10 @@
         }
 
         function savedata(all=false) {
-            text.style.visibility = 'visible';
             text.value = JSON.stringify(all ? grid: getrelevant());
         }
 
         function loaddata(corner=false) {
-            text.style.visibility = 'visible';
             if (!text.value) return;
             var gri = JSON.parse(text.value),
                 wid = gri[0].length,
@@ -139,6 +157,27 @@
                 y = Math.min(height - 1, Math.max(0, Math.ceil(v.offsetY / ps - 1)));
             grid[y][x] = 1 - grid[y][x];
             draw();
+        }
+
+        function onfps(v) {
+            start();
+        }
+
+        function ontoggle(v) {
+            if (run.checked) {
+                start()
+            } else {
+                stop();
+            }
+        }
+
+        function start() {
+            clearInterval(timer);
+            timer = setInterval(step, 1 / fps.value * 1000);
+        }
+
+        function stop() {
+            clearInterval(timer);
         }
 
         function draw() {
@@ -174,13 +213,21 @@
             draw();
         }
 
-        var width = 100, height = 100;
-        var canvas = document.getElementById('canvas');
-        var text = document.getElementById('text');
-        var cx = canvas.getContext('2d');
-        var grid = makegrid();
+        var width = 100,
+            height = 100,
+            grid = makegrid(),
+            timer = null;
+            text = document.getElementById('text'),
+            check = document.getElementById('run'),
+            fps = document.getElementById('fps'),
+            canvas = document.getElementById('canvas'),
+            cx = canvas.getContext('2d');
+            
+        loaddata();
         draw();
         canvas.onclick = onclick;
+        run.onclick = ontoggle;
+        fps.onclick = onfps;
     </script>
 </body>
 </html>
